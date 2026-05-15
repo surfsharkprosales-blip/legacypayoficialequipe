@@ -59,43 +59,39 @@ export default function CEODashboard() {
     try {
       setIsLoading(true);
       
-      const response = await fetch("/api/admin/stats");
-      
-      // Se acesso negado, redirecionar para login
-      if (response.status === 403 || response.status === 401) {
-        console.log("[v0] Acesso negado, redirecionando para login");
-        window.location.href = "/lp-x7k9m2-internal";
-        return;
-      }
-      
-      const data = await response.json();
-
-      if (data.stats) {
-        setStats({
-          totalProcessed: Number(data.stats.totalVolumeRaw) || 0,
-          totalFees: Number(data.stats.totalFeesRaw) || 0,
-          dailyVolume: 0,
-          activeUsers: Number(data.stats.totalUsers) || 0,
-          pendingKyc: 0,
-          pendingWithdrawals: 0,
-          approvalRate: 0,
-          completedTransactions: Number(data.stats.completedTransactions) || 0,
-        });
+      // Tentar buscar stats (sem redirecionar se falhar)
+      try {
+        const response = await fetch("/api/admin/stats");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.stats) {
+            setStats({
+              totalProcessed: Number(data.stats.totalVolumeRaw) || 0,
+              totalFees: Number(data.stats.totalFeesRaw) || 0,
+              dailyVolume: 0,
+              activeUsers: Number(data.stats.totalUsers) || 0,
+              pendingKyc: 0,
+              pendingWithdrawals: 0,
+              approvalRate: 0,
+              completedTransactions: Number(data.stats.completedTransactions) || 0,
+            });
+          }
+        }
+      } catch (e) {
+        console.log("Stats API error:", e);
       }
 
-      // Buscar transacoes separadamente
-      const txResponse = await fetch("/api/admin/transactions");
-      
-      // Se acesso negado, redirecionar para login
-      if (txResponse.status === 403 || txResponse.status === 401) {
-        console.log("[v0] Acesso negado em transactions, redirecionando para login");
-        window.location.href = "/lp-x7k9m2-internal";
-        return;
-      }
-      
-      const txData = await txResponse.json();
-      if (txData.transactions && Array.isArray(txData.transactions)) {
-        setRecentTransactions(txData.transactions);
+      // Tentar buscar transacoes (sem redirecionar se falhar)
+      try {
+        const txResponse = await fetch("/api/admin/transactions");
+        if (txResponse.ok) {
+          const txData = await txResponse.json();
+          if (txData.transactions && Array.isArray(txData.transactions)) {
+            setRecentTransactions(txData.transactions);
+          }
+        }
+      } catch (e) {
+        console.log("Transactions API error:", e);
       }
     } catch (error) {
       console.error("Error loading dashboard data:", error);
