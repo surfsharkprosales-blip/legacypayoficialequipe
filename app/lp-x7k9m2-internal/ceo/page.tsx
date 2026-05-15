@@ -6,7 +6,6 @@ import {
   Users,
   Wallet,
   DollarSign,
-  Activity,
   CheckCircle,
   Clock,
   ArrowUpRight,
@@ -49,54 +48,45 @@ export default function CEODashboard() {
     completedTransactions: 0,
   });
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
   }, []);
 
   async function loadDashboardData() {
+    // Carregar dados em background sem bloquear a UI
     try {
-      setIsLoading(true);
-      
-      // Tentar buscar stats (sem redirecionar se falhar)
-      try {
-        const response = await fetch("/api/admin/stats");
-        if (response.ok) {
-          const data = await response.json();
-          if (data.stats) {
-            setStats({
-              totalProcessed: Number(data.stats.totalVolumeRaw) || 0,
-              totalFees: Number(data.stats.totalFeesRaw) || 0,
-              dailyVolume: 0,
-              activeUsers: Number(data.stats.totalUsers) || 0,
-              pendingKyc: 0,
-              pendingWithdrawals: 0,
-              approvalRate: 0,
-              completedTransactions: Number(data.stats.completedTransactions) || 0,
-            });
-          }
+      const response = await fetch("/api/admin/stats");
+      if (response.ok) {
+        const data = await response.json();
+        if (data.stats) {
+          setStats({
+            totalProcessed: Number(data.stats.totalVolumeRaw) || 0,
+            totalFees: Number(data.stats.totalFeesRaw) || 0,
+            dailyVolume: 0,
+            activeUsers: Number(data.stats.totalUsers) || 0,
+            pendingKyc: 0,
+            pendingWithdrawals: 0,
+            approvalRate: 0,
+            completedTransactions: Number(data.stats.completedTransactions) || 0,
+          });
         }
-      } catch (e) {
-        console.log("Stats API error:", e);
       }
+    } catch (e) {
+      // Silently fail - show zeros
+    }
 
-      // Tentar buscar transacoes (sem redirecionar se falhar)
-      try {
-        const txResponse = await fetch("/api/admin/transactions");
-        if (txResponse.ok) {
-          const txData = await txResponse.json();
-          if (txData.transactions && Array.isArray(txData.transactions)) {
-            setRecentTransactions(txData.transactions);
-          }
+    try {
+      const txResponse = await fetch("/api/admin/transactions");
+      if (txResponse.ok) {
+        const txData = await txResponse.json();
+        if (txData.transactions && Array.isArray(txData.transactions)) {
+          setRecentTransactions(txData.transactions);
         }
-      } catch (e) {
-        console.log("Transactions API error:", e);
       }
-    } catch (error) {
-      console.error("Error loading dashboard data:", error);
-    } finally {
-      setIsLoading(false);
+    } catch (e) {
+      // Silently fail - show empty list
     }
   }
 
