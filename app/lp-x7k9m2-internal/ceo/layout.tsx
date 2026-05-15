@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -126,86 +126,11 @@ const getColorClasses = (color: string, isActive: boolean) => {
 };
 
 export default function CEOLayout({ children }: { children: React.ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [adminUser, setAdminUser] = useState("");
-  const [sessionTimeLeft, setSessionTimeLeft] = useState<string>("");
-  const [sessionExpired, setSessionExpired] = useState(false);
+  const [adminUser] = useState("Admin CEO");
+  const [sessionTimeLeft] = useState("24h 00m");
   const router = useRouter();
   const pathname = usePathname();
-
-  // Funcao para calcular tempo restante da sessao
-  const calculateTimeLeft = useCallback(() => {
-    if (typeof window === 'undefined') return "24h 00m";
-    
-    let loginTime = localStorage.getItem("lp_admin_login_time");
-    
-    // Se nao existe, criar agora
-    if (!loginTime) {
-      const now = Date.now().toString();
-      localStorage.setItem("lp_admin_login_time", now);
-      loginTime = now;
-    }
-    
-    const loginTimestamp = parseInt(loginTime);
-    const now = Date.now();
-    const sessionDuration = 24 * 60 * 60 * 1000; // 24 horas em ms
-    const timeLeft = loginTimestamp + sessionDuration - now;
-    
-    if (timeLeft <= 0) {
-      setSessionExpired(true);
-      return "Expirada";
-    }
-    
-    const hours = Math.floor(timeLeft / (1000 * 60 * 60));
-    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-    
-    if (hours > 0) {
-      return `${hours}h ${minutes.toString().padStart(2, '0')}m`;
-    }
-    return `${minutes}m ${seconds.toString().padStart(2, '0')}s`;
-  }, []);
-
-  useEffect(() => {
-    const token = localStorage.getItem("lp_admin_session");
-    const user = localStorage.getItem("lp_admin_user");
-    const role = localStorage.getItem("lp_admin_role");
-
-    if (!token || !user || role !== "ceo") {
-      router.push("/lp-x7k9m2-internal");
-    } else {
-      setIsAuthenticated(true);
-      setAdminUser(user);
-      
-      // Salvar tempo de login se nao existir
-      if (!localStorage.getItem("lp_admin_login_time")) {
-        localStorage.setItem("lp_admin_login_time", Date.now().toString());
-      }
-    }
-    setIsLoading(false);
-  }, [router]);
-
-  // Atualizar timer a cada segundo
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    
-    const interval = setInterval(() => {
-      const timeLeft = calculateTimeLeft();
-      setSessionTimeLeft(timeLeft);
-      
-      // Se sessao expirou, redirecionar
-      if (sessionExpired) {
-        handleLogout();
-      }
-    }, 1000);
-    
-    // Calcular imediatamente
-    setSessionTimeLeft(calculateTimeLeft());
-    
-    return () => clearInterval(interval);
-  }, [isAuthenticated, calculateTimeLeft, sessionExpired]);
 
   const handleLogout = () => {
     localStorage.removeItem("lp_admin_session");
@@ -214,18 +139,6 @@ export default function CEOLayout({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("lp_admin_login_time");
     router.push("/lp-x7k9m2-internal");
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-background">
