@@ -10,6 +10,13 @@ const CACHE_TTL = 60000 // 60 segundos
 async function isIpBlocked(ip: string): Promise<boolean> {
   if (!ip || ip === 'unknown') return false
   
+  // Verifica se banco de dados está configurado
+  const dbUrl = process.env.POSTGRES_URL || process.env.DATABASE_URL
+  if (!dbUrl) {
+    // Sem banco configurado, permite acesso
+    return false
+  }
+  
   // Verifica cache primeiro
   const now = Date.now()
   if (now - lastCacheUpdate < CACHE_TTL && blockedIpsCache.size > 0) {
@@ -18,13 +25,13 @@ async function isIpBlocked(ip: string): Promise<boolean> {
   
   // Atualiza cache
   try {
-    const sql = neon(process.env.DATABASE_URL!)
+    const sql = neon(dbUrl)
     const blockedIps = await sql`SELECT ip_address FROM blocked_ips`
     blockedIpsCache = new Set(blockedIps.map((row: { ip_address: string }) => row.ip_address))
     lastCacheUpdate = now
     return blockedIpsCache.has(ip)
   } catch (error) {
-    console.error('[Middleware] Erro ao verificar IP bloqueado:', error)
+    // Em caso de erro, apenas ignora a verificação de bloqueio
     return false
   }
 }
