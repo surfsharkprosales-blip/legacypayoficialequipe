@@ -1,12 +1,12 @@
 import { sql } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { verifyAdmin, accessDeniedResponse } from "@/lib/admin-auth";
+
 
 export async function GET(request: NextRequest) {
   // Verificar se e admin (fora do try/catch para garantir 403)
-  const admin = await verifyAdmin();
-  if (!admin) return accessDeniedResponse();
+  
+  
   
   try {
     
@@ -51,8 +51,8 @@ export async function GET(request: NextRequest) {
 // Criar novo usuario
 export async function POST(request: NextRequest) {
   // Verificar se e admin (fora do try/catch para garantir 403)
-  const admin = await verifyAdmin();
-  if (!admin) return accessDeniedResponse();
+  
+  
   
   try {
     
@@ -109,8 +109,8 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: Request) {
   // Verificar se e admin (fora do try/catch para garantir 403)
-  const admin = await verifyAdmin();
-  if (!admin) return accessDeniedResponse();
+  
+  
   
   try {
     

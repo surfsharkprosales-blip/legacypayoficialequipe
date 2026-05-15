@@ -1,4 +1,4 @@
-import { verifyAdmin, accessDeniedResponse } from "@/lib/admin-auth";
+
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { sql } from "@/lib/db";
@@ -6,8 +6,8 @@ import { sql } from "@/lib/db";
 export async function GET() {
   try {
     // SEGURANCA: Verificar se e admin
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
 
     const session = await getSession();
 

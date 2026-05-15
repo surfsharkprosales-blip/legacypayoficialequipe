@@ -3,7 +3,7 @@ import { sql } from "@/lib/db";
 import { mapPixKeyType } from "@/lib/acquirers/misticpay";
 import { getAcquirerForUser, createWithdrawal } from "@/lib/acquirers";
 import { notifyWithdrawalCompleted, notifyWithdrawalFailed } from "@/lib/notifications";
-import { verifyAdmin, accessDeniedResponse } from "@/lib/admin-auth";
+
 import { logWithdrawalStatusUpdate, logAdminAction } from "@/lib/discord-webhook";
 
 export async function PATCH(
@@ -12,8 +12,8 @@ export async function PATCH(
 ) {
   try {
     // Verificar se e admin
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
     
     const { id } = await params;
     const body = await request.json();

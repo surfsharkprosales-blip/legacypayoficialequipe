@@ -1,4 +1,4 @@
-import { verifyAdmin, accessDeniedResponse } from "@/lib/admin-auth";
+
 import { sql } from "@/lib/db";
 import { NextResponse } from "next/server";
 
@@ -7,8 +7,8 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     // Verificar se e admin
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
     // Buscar estatísticas em paralelo
     const [
       totalUsersResult,

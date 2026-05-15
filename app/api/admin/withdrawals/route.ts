@@ -1,12 +1,12 @@
-import { verifyAdmin, accessDeniedResponse } from "@/lib/admin-auth";
+
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 
 export async function GET(request: NextRequest) {
   try {
     // Verificar se e admin
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
 

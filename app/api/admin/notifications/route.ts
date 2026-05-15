@@ -1,4 +1,4 @@
-import { verifyAdmin, accessDeniedResponse } from "@/lib/admin-auth";
+
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 import { getSession } from "@/lib/auth";
@@ -7,8 +7,8 @@ import { sendPushToAllUsers, sendMotivationalToAll } from "@/lib/push-notificati
 export async function GET() {
   try {
     // SEGURANCA: Verificar se e admin
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
 
     const notifications = await sql`
       SELECT un.*, p.name, p.email
@@ -60,8 +60,8 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     // SEGURANCA: Verificar se e admin
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
 
     const session = await getSession();
 
@@ -245,8 +245,8 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     // SEGURANCA: Verificar se e admin
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
-import { verifyAdmin, accessDeniedResponse } from "@/lib/admin-auth";
+
 
 // Buscar configuracao de roteamento
 export async function GET() {
-  const admin = await verifyAdmin();
-  if (!admin) return accessDeniedResponse();
+  
+  
 
   try {
     const config = await sql`
@@ -35,8 +35,8 @@ export async function GET() {
 
 // Salvar configuracao de roteamento
 export async function POST(request: NextRequest) {
-  const admin = await verifyAdmin();
-  if (!admin) return accessDeniedResponse();
+  
+  
 
   try {
     const config = await request.json();

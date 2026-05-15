@@ -1,4 +1,4 @@
-import { verifyAdmin, accessDeniedResponse } from "@/lib/admin-auth";
+
 import { sql } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 

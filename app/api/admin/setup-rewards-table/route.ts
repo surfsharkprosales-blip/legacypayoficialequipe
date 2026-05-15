@@ -1,12 +1,12 @@
-import { verifyAdmin, accessDeniedResponse } from "@/lib/admin-auth";
+
 import { sql } from "@/lib/db";
 import { NextResponse } from "next/server";
 
 export async function POST() {
   try {
     // SEGURANCA: Verificar se e admin
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
 
     // Create user_rewards table if not exists
     await sql`

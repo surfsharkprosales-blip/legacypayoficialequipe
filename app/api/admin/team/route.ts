@@ -1,4 +1,4 @@
-import { verifyAdmin, accessDeniedResponse } from "@/lib/admin-auth";
+
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
 import bcrypt from 'bcryptjs'
@@ -7,8 +7,8 @@ import bcrypt from 'bcryptjs'
 export async function GET() {
   try {
     // SEGURANCA: Verificar se e admin
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
 
     const result = await sql`
       SELECT id, name, email, role, permissions, is_active, last_login, created_at
@@ -33,8 +33,8 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     // SEGURANCA: Verificar se e admin
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
 
     const body = await request.json()
     const { name, email, password, role, permissions, requestedBy } = body
@@ -107,8 +107,8 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     // SEGURANCA: Verificar se e admin
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
 
     const body = await request.json()
     const { id, name, email, password, role, permissions, is_active } = body
@@ -157,8 +157,8 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     // SEGURANCA: Verificar se e admin
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
 
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')

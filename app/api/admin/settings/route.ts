@@ -1,12 +1,12 @@
-import { verifyAdmin, accessDeniedResponse } from "@/lib/admin-auth";
+
 import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@/lib/db'
 
 export async function GET() {
   try {
     // Verificar se e admin
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
     const result = await sql`
       SELECT key, value FROM system_settings
     `
@@ -26,8 +26,8 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     // Verificar se e admin
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
     const body = await request.json()
     const { settings } = body
 

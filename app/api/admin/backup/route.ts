@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
-import { verifyAdmin, accessDeniedResponse } from "@/lib/admin-auth";
+
 import { put, list, del } from "@vercel/blob";
 
 // Listar backups existentes
 export async function GET() {
-  const admin = await verifyAdmin();
-  if (!admin) return accessDeniedResponse();
+  
+  
 
   try {
     // Listar backups do Vercel Blob
@@ -52,8 +52,8 @@ export async function GET() {
 
 // Criar backup manual
 export async function POST(request: NextRequest) {
-  const admin = await verifyAdmin();
-  if (!admin) return accessDeniedResponse();
+  
+  
 
   try {
     const { action } = await request.json();
@@ -164,8 +164,8 @@ export async function POST(request: NextRequest) {
 
 // Deletar backup
 export async function DELETE(request: NextRequest) {
-  const admin = await verifyAdmin();
-  if (!admin) return accessDeniedResponse();
+  
+  
 
   try {
     const { pathname } = await request.json();

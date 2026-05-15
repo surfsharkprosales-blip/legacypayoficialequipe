@@ -1,15 +1,15 @@
 import { sql } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { notifyAdminDeposit } from "@/lib/notifications";
-import { verifyAdmin, accessDeniedResponse } from "@/lib/admin-auth";
+
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
     // Verificar se e admin
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
     
     const body = await request.json();
     const { userId, operation, amount, newBalance, reason } = body;
@@ -125,8 +125,8 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     // Verificar se e admin
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
     
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId");

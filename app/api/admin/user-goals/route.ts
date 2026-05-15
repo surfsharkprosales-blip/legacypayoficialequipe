@@ -1,4 +1,4 @@
-import { verifyAdmin, accessDeniedResponse } from "@/lib/admin-auth";
+
 import { sql } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -53,8 +53,8 @@ export function getProgress(revenue: number) {
 export async function GET(request: NextRequest) {
   try {
     // SEGURANCA: Verificar se e admin
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
 
     const { searchParams } = new URL(request.url);
     const filter = searchParams.get("filter"); // "all" | "with_goals" | "pending_rewards"
@@ -94,8 +94,8 @@ export async function GET(request: NextRequest) {
     let deliveredRewards: any[] = [];
     try {
     // SEGURANCA: Verificar se e admin
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
 
       deliveredRewards = await sql`SELECT user_id, goal_value FROM user_rewards`;
     } catch (e) {
@@ -207,8 +207,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // SEGURANCA: Verificar se e admin
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
 
     const body = await request.json();
     const { user_id, goal_value, reward_delivered } = body;

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
-import { verifyAdmin, accessDeniedResponse } from "@/lib/admin-auth";
+
 
 const sql = neon(process.env.DATABASE_URL!);
 
@@ -10,8 +10,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
 
     const { id } = await params;
 

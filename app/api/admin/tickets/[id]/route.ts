@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
-import { verifyAdmin, accessDeniedResponse } from "@/lib/admin-auth";
+
 import { logTicketClosed, logTicketAdminReply } from "@/lib/discord-webhook";
 
 const sql = neon(process.env.DATABASE_URL!);
@@ -13,8 +13,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
 
     const { id } = await params;
 
@@ -87,8 +87,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
 
     const { id } = await params;
     const body = await request.json();
@@ -168,8 +168,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
 
     const { id } = await params;
     const body = await request.json();

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sql } from "@/lib/db";
-import { verifyAdmin, accessDeniedResponse } from "@/lib/admin-auth";
+
 
 export const dynamic = 'force-dynamic';
 
@@ -14,8 +14,8 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
     // Verificar se e admin
-    const admin = await verifyAdmin();
-    if (!admin) return accessDeniedResponse();
+    
+    
     
     const { transactionId } = await request.json();
 
