@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -36,6 +36,7 @@ import {
   Building,
   Users2,
   Zap,
+  RefreshCw,
 } from "lucide-react";
 
 const menuItems = [
@@ -62,39 +63,94 @@ const menuItems = [
   { icon: Settings, label: "Configuracoes", href: "/lp-x7k9m2-internal/ceo/settings" },
 ];
 
-const statsCards = [
-  {
-    title: "Volume Total",
-    value: "R$ 0,00",
-    change: "+0%",
-    positive: true,
-    icon: DollarSign,
-  },
-  {
-    title: "Taxas Coletadas",
-    value: "R$ 0,00",
-    change: "+0%",
-    positive: true,
-    icon: TrendingUp,
-  },
-  {
-    title: "Usuarios Ativos",
-    value: "0",
-    change: "+0",
-    positive: true,
-    icon: Users,
-  },
-  {
-    title: "Transacoes Hoje",
-    value: "0",
-    change: "+0%",
-    positive: true,
-    icon: CreditCard,
-  },
-];
+interface DashboardStats {
+  totalVolume: number;
+  totalFees: number;
+  totalUsers: number;
+  totalTransactions: number;
+  pendingKyc: number;
+  pendingWithdrawals: number;
+  openTickets: number;
+  recentTransactions: Array<{
+    id: string;
+    type: string;
+    amount: number;
+    status: string;
+    created_at: string;
+    user_email?: string;
+  }>;
+}
+
+const formatBRL = (value: number) => {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+};
 
 export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [stats, setStats] = useState<DashboardStats>({
+    totalVolume: 0,
+    totalFees: 0,
+    totalUsers: 0,
+    totalTransactions: 0,
+    pendingKyc: 0,
+    pendingWithdrawals: 0,
+    openTickets: 0,
+    recentTransactions: [],
+  });
+  const [loading, setLoading] = useState(false);
+
+  const loadStats = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/dashboard-stats");
+      if (res.ok) {
+        const data = await res.json();
+        setStats(data);
+      }
+    } catch (error) {
+      console.error("Error loading stats:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  const statsCards = [
+    {
+      title: "Volume Total",
+      value: formatBRL(stats.totalVolume),
+      change: "+0%",
+      positive: true,
+      icon: DollarSign,
+    },
+    {
+      title: "Taxas Coletadas",
+      value: formatBRL(stats.totalFees),
+      change: "+0%",
+      positive: true,
+      icon: TrendingUp,
+    },
+    {
+      title: "Usuarios Ativos",
+      value: stats.totalUsers.toString(),
+      change: "+0",
+      positive: true,
+      icon: Users,
+    },
+    {
+      title: "Transacoes Hoje",
+      value: stats.totalTransactions.toString(),
+      change: "+0%",
+      positive: true,
+      icon: CreditCard,
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -184,6 +240,13 @@ export default function AdminDashboard() {
             </div>
 
             <div className="flex items-center gap-2">
+              <button 
+                onClick={loadStats}
+                disabled={loading}
+                className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-white transition-colors disabled:opacity-50"
+              >
+                <RefreshCw className={`w-5 h-5 ${loading ? "animate-spin" : ""}`} />
+              </button>
               <button className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-white transition-colors relative">
                 <Bell className="w-5 h-5" />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
@@ -246,12 +309,47 @@ export default function AdminDashboard() {
                 </Link>
               </div>
               <div className="space-y-3">
-                <div className="flex items-center justify-center py-8 text-muted-foreground">
-                  <div className="text-center">
-                    <CreditCard className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">Nenhuma transacao encontrada</p>
+                {stats.recentTransactions.length > 0 ? (
+                  stats.recentTransactions.map((tx) => (
+                    <div
+                      key={tx.id}
+                      className="flex items-center justify-between p-3 rounded-lg bg-secondary/50"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                          tx.type === "pix_in" ? "bg-green-500/10" : "bg-red-500/10"
+                        }`}>
+                          {tx.type === "pix_in" ? (
+                            <ArrowDownRight className="w-4 h-4 text-green-500" />
+                          ) : (
+                            <ArrowUpRight className="w-4 h-4 text-red-500" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-white">
+                            {tx.type === "pix_in" ? "PIX Entrada" : "PIX Saida"}
+                          </p>
+                          <p className="text-xs text-muted-foreground">{tx.user_email || "Usuario"}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className={`text-sm font-medium ${
+                          tx.type === "pix_in" ? "text-green-500" : "text-red-500"
+                        }`}>
+                          {tx.type === "pix_in" ? "+" : "-"}{formatBRL(tx.amount)}
+                        </p>
+                        <p className="text-xs text-muted-foreground capitalize">{tx.status}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex items-center justify-center py-8 text-muted-foreground">
+                    <div className="text-center">
+                      <CreditCard className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">Nenhuma transacao encontrada</p>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
 
@@ -271,7 +369,7 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-white">KYC Pendentes</p>
-                      <p className="text-xs text-muted-foreground">0 solicitacoes</p>
+                      <p className="text-xs text-muted-foreground">{stats.pendingKyc} solicitacoes</p>
                     </div>
                   </div>
                   <ArrowUpRight className="w-4 h-4 text-muted-foreground" />
@@ -287,7 +385,7 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-white">Saques Pendentes</p>
-                      <p className="text-xs text-muted-foreground">0 solicitacoes</p>
+                      <p className="text-xs text-muted-foreground">{stats.pendingWithdrawals} solicitacoes</p>
                     </div>
                   </div>
                   <ArrowUpRight className="w-4 h-4 text-muted-foreground" />
@@ -303,7 +401,7 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-white">Tickets Abertos</p>
-                      <p className="text-xs text-muted-foreground">0 tickets</p>
+                      <p className="text-xs text-muted-foreground">{stats.openTickets} tickets</p>
                     </div>
                   </div>
                   <ArrowUpRight className="w-4 h-4 text-muted-foreground" />
@@ -327,7 +425,7 @@ export default function AdminDashboard() {
                 <div className="w-3 h-3 rounded-full bg-green-500" />
                 <div>
                   <p className="text-sm font-medium text-white">Banco de Dados</p>
-                  <p className="text-xs text-muted-foreground">Conectado</p>
+                  <p className="text-xs text-muted-foreground">Supabase Conectado</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50">
