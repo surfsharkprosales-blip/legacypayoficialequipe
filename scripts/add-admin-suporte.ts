@@ -8,8 +8,15 @@
  * Executar com: npx tsx scripts/add-admin-suporte.ts
  */
 
-import { sql } from "@/lib/db";
+import { neon } from "@neondatabase/serverless";
 import bcrypt from "bcryptjs";
+
+// Use POSTGRES_URL from Supabase or DATABASE_URL
+const databaseUrl = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+if (!databaseUrl) {
+  throw new Error("POSTGRES_URL or DATABASE_URL environment variable is not set");
+}
+const sql = neon(databaseUrl);
 
 async function addAdminSupporte() {
   console.log("[Admin] Adicionando usuario admin de suporte...");
