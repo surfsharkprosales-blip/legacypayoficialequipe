@@ -1,6 +1,6 @@
 import { handleAuth } from '@/lib/middleware-auth'
 import { type NextRequest, NextResponse } from 'next/server'
-import { neon } from '@neondatabase/serverless'
+import postgres from 'postgres'
 
 // Cache de IPs bloqueados (atualiza a cada 60 segundos)
 let blockedIpsCache: Set<string> = new Set()
@@ -25,8 +25,9 @@ async function isIpBlocked(ip: string): Promise<boolean> {
   
   // Atualiza cache
   try {
-    const sql = neon(dbUrl)
+    const sql = postgres(dbUrl, { ssl: 'require' })
     const blockedIps = await sql`SELECT ip_address FROM blocked_ips`
+    await sql.end()
     blockedIpsCache = new Set(blockedIps.map((row: { ip_address: string }) => row.ip_address))
     lastCacheUpdate = now
     return blockedIpsCache.has(ip)

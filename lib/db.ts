@@ -1,9 +1,6 @@
-import { neon, NeonQueryFunction } from '@neondatabase/serverless'
+import postgres from 'postgres'
 
-// Lazy initialization - only create connection when actually needed
-let _sql: NeonQueryFunction<false, false> | null = null
-
-// Get database URL from environment - supports both Supabase and Neon
+// Get database URL from environment - Supabase provides POSTGRES_URL
 function getDatabaseUrl(): string {
   const url = process.env.POSTGRES_URL || process.env.DATABASE_URL
   if (!url) {
@@ -13,33 +10,37 @@ function getDatabaseUrl(): string {
 }
 
 // Create a reusable SQL client with lazy initialization
-function getSql(): NeonQueryFunction<false, false> {
+let _sql: ReturnType<typeof postgres> | null = null
+
+function getSql(): ReturnType<typeof postgres> {
   if (!_sql) {
-    _sql = neon(getDatabaseUrl())
+    _sql = postgres(getDatabaseUrl(), {
+      ssl: 'require',
+      max: 10,
+      idle_timeout: 20,
+      connect_timeout: 10,
+    })
   }
   return _sql
 }
 
-// Export sql as a function that lazily initializes the connection
-// This maintains backward compatibility with existing code using `sql`
-export const sql: NeonQueryFunction<false, false> = ((
-  strings: TemplateStringsArray,
-  ...values: unknown[]
-) => {
-  return getSql()(strings, ...values)
-}) as NeonQueryFunction<false, false>
+// Export sql as a tagged template function for queries
+// Usage: sql`SELECT * FROM users WHERE id = ${userId}`
+export const sql = getSql()
 
 // Helper function to check if database is configured
 export function isDatabaseConfigured(): boolean {
   return !!(process.env.POSTGRES_URL || process.env.DATABASE_URL)
 }
 
-// Helper for transactions (Neon doesn't support transactions in serverless mode, 
-// but we can use this pattern for consistency)
+// Helper for transactions
 export async function withTransaction<T>(
-  callback: (sql: NeonQueryFunction<false, false>) => Promise<T>
+  callback: (sql: ReturnType<typeof postgres>) => Promise<T>
 ): Promise<T> {
-  // In serverless Neon, each query is its own transaction
-  // For complex transactions, consider using Neon's connection pooling
-  return callback(neon(getDatabaseUrl()))
+  const client = postgres(getDatabaseUrl(), { ssl: 'require' })
+  try {
+    return await callback(client)
+  } finally {
+    await client.end()
+  }
 }
